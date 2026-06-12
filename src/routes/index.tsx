@@ -271,15 +271,15 @@ function Index() {
                 value={selectedReportId ?? currentReportId ?? ""}
                 onValueChange={handleReportSelect}
               >
-                <SelectTrigger className="h-8 w-52 text-sm">
+                <SelectTrigger className="h-8 w-72 text-sm">
                   <SelectValue placeholder="בחר שבוע" />
                 </SelectTrigger>
                 <SelectContent>
                   {allReports.map((r) => (
                     <SelectItem key={r.id} value={r.id}>
                       {r.id === currentReportId
-                        ? `השבוע הנוכחי (${formatDate(r.weekStart)})`
-                        : formatDate(r.weekStart)}
+                        ? `השבוע הנוכחי · ${formatDate(r.weekStart)}`
+                        : `${formatDate(r.weekStart)} – ${formatDate(r.weekEnd)} · נוצר ${formatDate(r.createdAt)}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -331,6 +331,16 @@ function Index() {
         </div>
       </header>
       <main className="mx-auto max-w-[1400px] px-6 py-6">
+        {isViewingHistory && (
+          <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+            צפייה בדוח היסטורי — קריאה בלבד
+            {selectedReport && (
+              <span className="me-2 font-normal text-amber-700">
+                {" "}· שבוע {formatDate(selectedReport.weekStart)} עד {formatDate(selectedReport.weekEnd)}
+              </span>
+            )}
+          </div>
+        )}
         {isViewingHistory ? (
           <HistoryViewer topics={historyTopics} />
         ) : (
