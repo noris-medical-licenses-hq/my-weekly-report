@@ -19,21 +19,26 @@ export function TopicsTable({ topics, onChange, onDelete }: TopicsTableProps) {
     );
   }
 
-  const th = "border-s border-border px-2 py-2 text-right font-semibold";
+  const th =
+    "border-s border-border px-2 py-1.5 text-right font-semibold whitespace-nowrap";
   return (
-    <div className="overflow-x-auto rounded-md border border-border bg-card">
+    <div className="rounded-md border border-border bg-card">
       <table className="w-full border-collapse text-right">
-        <thead className="border-b border-border bg-muted/60 text-[11px] uppercase tracking-wide text-muted-foreground">
+        <thead className="sticky top-0 z-20 bg-muted text-[11px] uppercase tracking-wide text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border)),0_2px_4px_-2px_rgba(0,0,0,0.08)]">
           <tr>
-            <th className="w-9 border-s border-border" />
-            <th className={`${th} w-52`}>קבוצה</th>
-            <th className={th}>נושא</th>
-            <th className={`${th} w-28 text-center`}>שינוי</th>
-            <th className={`${th} w-28`}>עדיפות</th>
-            <th className={`${th} w-24 text-center`}>דורש תמיכה</th>
-            <th className={`${th} w-20 text-center`}>נסקר</th>
-            <th className={`${th} w-32`}>סטטוס</th>
-            <th className="w-9 border-s border-border" />
+            <th className="w-8 border-s border-b border-border" />
+            <th className={`${th} w-44 border-b`}>קבוצה</th>
+            <th className={`${th} border-b`}>נושא</th>
+            <th className={`${th} w-10 border-b text-center`} title="שינוי מהדוח הקודם">
+              שינוי
+            </th>
+            <th className={`${th} w-20 border-b`}>עדיפות</th>
+            <th className={`${th} w-10 border-b text-center`} title="דורש תמיכה">
+              תמיכה
+            </th>
+            <th className={`${th} w-10 border-b text-center`}>נסקר</th>
+            <th className={`${th} w-24 border-b`}>סטטוס</th>
+            <th className="w-8 border-s border-b border-border" />
           </tr>
         </thead>
         <tbody>
