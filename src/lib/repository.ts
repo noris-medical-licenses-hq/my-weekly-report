@@ -250,3 +250,26 @@ export async function createSupabaseRepositories(): Promise<{
   const report = await reportRepo.getOrCreateCurrent();
   return { topics: new SupabaseTopicRepository(report.id), report };
 }
+
+// Creates a brand-new report (weekly rollover) and updates the stored current-report pointer.
+export async function createFreshReport(): Promise<{
+  topics: TopicRepository;
+  report: Report;
+}> {
+  const today = new Date().toISOString().split("T")[0];
+  const weekEnd = new Date(Date.now() + 6 * 86400000).toISOString().split("T")[0];
+
+  const { data, error } = await supabase
+    .from("reports")
+    .insert({ week_start: today, week_end: weekEnd })
+    .select("*")
+    .single();
+
+  if (error) throw new Error(`Failed to create report: ${error.message}`);
+
+  const report = rowToReport(data as ReportRow);
+  if (typeof window !== "undefined") {
+    localStorage.setItem(CURRENT_REPORT_KEY, report.id);
+  }
+  return { topics: new SupabaseTopicRepository(report.id), report };
+}

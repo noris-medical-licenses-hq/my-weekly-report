@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Download, Plus, Save } from "lucide-react";
+import { Download, Plus, RefreshCw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,11 @@ import { FilterBar, EMPTY_FILTERS, type Filters } from "@/components/reporting/F
 import { exportTopicsToExcel } from "@/lib/export-excel";
 import { topicsStore } from "@/lib/projects-store";
 import { emptyTopic, type Topic } from "@/lib/types";
-import { createSupabaseRepositories, runMigrationIfNeeded } from "@/lib/repository";
+import {
+  createFreshReport,
+  createSupabaseRepositories,
+  runMigrationIfNeeded,
+} from "@/lib/repository";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -88,6 +92,39 @@ function Index() {
     }
   };
 
+  const rolloverWeek = async () => {
+    if (
+      !window.confirm(
+        "האם לפתוח שבוע חדש?\nהעדכון השבועי הנוכחי יועבר לעדכון שבוע קודם.",
+      )
+    )
+      return;
+
+    setSaving(true);
+    try {
+      const rolled = topics.map((t) => ({
+        ...t,
+        previousWeekUpdate: t.currentWeekUpdate,
+        currentWeekUpdate: "",
+        updatedAt: new Date().toISOString(),
+      }));
+
+      const { topics: repo } = await createFreshReport();
+      await repo.saveAll(rolled);
+      topicsStore.saveAll(rolled);
+
+      setTopics(rolled);
+      setDirty(false);
+      setLastSavedAt(new Date());
+      toast.success("נפתח שבוע דיווח חדש");
+    } catch (e) {
+      console.error("Rollover failed:", e);
+      toast.error("שגיאה בפתיחת שבוע חדש");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const exportXlsx = () => {
     exportTopicsToExcel(filtered);
     toast.success("הקובץ יוצא");
@@ -150,6 +187,10 @@ function Index() {
             <Button variant="outline" size="sm" onClick={exportXlsx}>
               <Download className="ms-1 h-4 w-4" />
               ייצוא ל-Excel
+            </Button>
+            <Button variant="outline" size="sm" onClick={rolloverWeek} disabled={saving}>
+              <RefreshCw className="ms-1 h-4 w-4" />
+              פתח שבוע חדש
             </Button>
             <Button size="sm" onClick={save} disabled={!dirty || saving}>
               <Save className="ms-1 h-4 w-4" />
