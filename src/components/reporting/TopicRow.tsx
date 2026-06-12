@@ -11,14 +11,17 @@ import {
 } from "@/components/ui/select";
 import {
   GROUPS,
+  PRIORITY_LABELS,
   STATUS_LABELS,
   type Group,
+  type Priority,
   type ProjectStatus,
   type Topic,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { FieldBlock } from "./FieldBlock";
 import { StatusBadge } from "./StatusBadge";
+import { PriorityBadge } from "./PriorityBadge";
 
 interface TopicRowProps {
   topic: Topic;
@@ -35,6 +38,7 @@ export function TopicRow({
   onChange,
   onDelete,
 }: TopicRowProps) {
+  const cell = "border-s border-border px-2 py-1.5 align-middle";
   return (
     <>
       <tr
@@ -43,7 +47,7 @@ export function TopicRow({
           expanded && "bg-muted/30",
         )}
       >
-        <td className="w-10 px-1 py-1.5 align-middle">
+        <td className="w-9 border-s border-border px-1 py-1.5 align-middle">
           <Button
             variant="ghost"
             size="icon"
@@ -56,7 +60,7 @@ export function TopicRow({
             />
           </Button>
         </td>
-        <td className="px-2 py-1.5 align-middle">
+        <td className={cell}>
           {expanded ? (
             <Select
               value={topic.group}
@@ -77,7 +81,7 @@ export function TopicRow({
             <span className="text-xs text-muted-foreground">{topic.group}</span>
           )}
         </td>
-        <td className="px-2 py-1.5 align-middle">
+        <td className={cell}>
           {expanded ? (
             <Input
               value={topic.topic}
@@ -91,21 +95,51 @@ export function TopicRow({
             </span>
           )}
         </td>
-        <td className="px-2 py-1.5 text-center align-middle">
+        <td className={cn(cell, "text-center")}>
           <Checkbox
             checked={topic.changedSincePrevious}
             onCheckedChange={(v) => onChange({ changedSincePrevious: v === true })}
             aria-label="שינוי מהדוח הקודם"
           />
         </td>
-        <td className="px-2 py-1.5 text-center align-middle">
+        <td className={cell}>
+          {expanded ? (
+            <Select
+              value={topic.priority}
+              onValueChange={(v) => onChange({ priority: v as Priority })}
+            >
+              <SelectTrigger className="h-8 w-28 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(PRIORITY_LABELS) as Priority[]).map((p) => (
+                  <SelectItem key={p} value={p} className="text-xs">
+                    {PRIORITY_LABELS[p]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <PriorityBadge priority={topic.priority} />
+          )}
+        </td>
+        <td className={cn(cell, "text-center")}>
+          <Checkbox
+            checked={!!topic.supportRequired?.trim()}
+            onCheckedChange={(v) =>
+              onChange({ supportRequired: v === true ? topic.supportRequired || " " : "" })
+            }
+            aria-label="דורש תמיכה"
+          />
+        </td>
+        <td className={cn(cell, "text-center")}>
           <Checkbox
             checked={topic.reviewed}
             onCheckedChange={(v) => onChange({ reviewed: v === true })}
             aria-label="נסקר"
           />
         </td>
-        <td className="px-2 py-1.5 align-middle">
+        <td className={cell}>
           {expanded ? (
             <Select
               value={topic.status}
@@ -126,7 +160,7 @@ export function TopicRow({
             <StatusBadge status={topic.status} />
           )}
         </td>
-        <td className="w-10 px-1 py-1.5 align-middle">
+        <td className="w-9 border-s border-border px-1 py-1.5 align-middle">
           <Button
             variant="ghost"
             size="icon"
@@ -140,7 +174,7 @@ export function TopicRow({
       </tr>
       {expanded && (
         <tr className="border-b border-border bg-muted/20">
-          <td colSpan={7} className="px-6 py-5">
+          <td colSpan={9} className="px-6 py-5">
             <div className="grid gap-4 md:grid-cols-2">
               <FieldBlock
                 id={`${topic.id}-prev`}

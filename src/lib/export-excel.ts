@@ -1,11 +1,13 @@
 import * as XLSX from "xlsx";
-import { STATUS_LABELS, type Topic } from "./types";
+import { PRIORITY_LABELS, STATUS_LABELS, type Topic } from "./types";
 
 export function exportTopicsToExcel(topics: Topic[]): void {
   const rows = topics.map((t) => ({
     קבוצה: t.group,
     נושא: t.topic,
     'שינוי מהדוח הקודם': t.changedSincePrevious ? "כן" : "לא",
+    עדיפות: PRIORITY_LABELS[t.priority],
+    'דורש תמיכה': t.supportRequired?.trim() ? "כן" : "לא",
     נסקר: t.reviewed ? "כן" : "לא",
     סטטוס: STATUS_LABELS[t.status],
     "עדכון שבוע קודם": t.previousWeekUpdate,
@@ -17,7 +19,7 @@ export function exportTopicsToExcel(topics: Topic[]): void {
 
   const ws = XLSX.utils.json_to_sheet(rows);
   ws["!cols"] = [
-    { wch: 24 }, { wch: 28 }, { wch: 14 }, { wch: 10 }, { wch: 12 },
+    { wch: 24 }, { wch: 28 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 12 },
     { wch: 40 }, { wch: 40 }, { wch: 36 }, { wch: 30 }, { wch: 30 },
   ];
   if (!ws["!views"]) ws["!views"] = [{}];

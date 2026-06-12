@@ -7,7 +7,7 @@ import { SEED_TOPICS } from "./seed-data";
  * by replacing the function bodies — signatures stay the same.
  */
 
-const STORAGE_KEY = "weekly-reporting:topics:v2";
+const STORAGE_KEY = "weekly-reporting:topics:v3";
 
 function read(): Topic[] {
   if (typeof window === "undefined") return [];
