@@ -9,6 +9,7 @@ import { FilterBar, EMPTY_FILTERS, type Filters } from "@/components/reporting/F
 import { exportTopicsToExcel } from "@/lib/export-excel";
 import { topicsStore } from "@/lib/projects-store";
 import { emptyTopic, type Topic } from "@/lib/types";
+import { createSupabaseRepositories, runMigrationIfNeeded } from "@/lib/repository";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,12 +27,23 @@ function Index() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [dirty, setDirty] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   useEffect(() => {
-    setTopics(topicsStore.list());
-    setLoaded(true);
+    async function load() {
+      try {
+        await runMigrationIfNeeded();
+        const { topics: repo } = await createSupabaseRepositories();
+        setTopics(await repo.list());
+      } catch (e) {
+        console.error("Supabase load failed, falling back to localStorage:", e);
+        setTopics(topicsStore.list());
+      }
+      setLoaded(true);
+    }
+    load();
   }, []);
 
   const updateTopic = (id: string, patch: Partial<Topic>) => {
@@ -54,12 +66,26 @@ function Index() {
     setDirty(true);
   };
 
-  const save = () => {
-    topicsStore.saveAll(topics);
-    const now = new Date();
-    setLastSavedAt(now);
-    setDirty(false);
-    toast.success("הדיווח נשמר");
+  const save = async () => {
+    setSaving(true);
+    try {
+      const { topics: repo } = await createSupabaseRepositories();
+      await repo.saveAll(topics);
+      topicsStore.saveAll(topics);
+      const now = new Date();
+      setLastSavedAt(now);
+      setDirty(false);
+      toast.success("הדיווח נשמר");
+    } catch (e) {
+      console.error("Supabase save failed, saving to localStorage:", e);
+      topicsStore.saveAll(topics);
+      const now = new Date();
+      setLastSavedAt(now);
+      setDirty(false);
+      toast.success("הדיווח נשמר (מקומי)");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const exportXlsx = () => {
@@ -125,9 +151,9 @@ function Index() {
               <Download className="ms-1 h-4 w-4" />
               ייצוא ל-Excel
             </Button>
-            <Button size="sm" onClick={save} disabled={!dirty}>
+            <Button size="sm" onClick={save} disabled={!dirty || saving}>
               <Save className="ms-1 h-4 w-4" />
-              שמור הכל
+              {saving ? "שומר..." : "שמור הכל"}
             </Button>
           </div>
         </div>
