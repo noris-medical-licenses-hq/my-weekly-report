@@ -252,6 +252,25 @@ export async function createSupabaseRepositories(): Promise<{
   return { topics: new SupabaseTopicRepository(report.id), report };
 }
 
+export async function listReports(): Promise<Report[]> {
+  const { data, error } = await supabase
+    .from("reports")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Failed to list reports: ${error.message}`);
+  return ((data ?? []) as ReportRow[]).map(rowToReport);
+}
+
+export async function loadReportTopics(reportId: string): Promise<Topic[]> {
+  const { data, error } = await supabase
+    .from("topics")
+    .select("*")
+    .eq("report_id", reportId)
+    .order("sort_order", { ascending: true });
+  if (error) throw new Error(`Failed to load topics: ${error.message}`);
+  return ((data ?? []) as TopicRow[]).map(rowToTopic);
+}
+
 // Creates a brand-new report (weekly rollover) and updates the stored current-report pointer.
 export async function createFreshReport(): Promise<{
   topics: TopicRepository;

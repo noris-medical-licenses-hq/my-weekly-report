@@ -4,7 +4,15 @@ import { Download, LogOut, Plus, RefreshCw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TopicsTable } from "@/components/reporting/TopicsTable";
+import { HistoryViewer } from "@/components/reporting/HistoryViewer";
 import { FilterBar, EMPTY_FILTERS, type Filters } from "@/components/reporting/FilterBar";
 import { exportTopicsToExcel } from "@/lib/export-excel";
 import { topicsStore } from "@/lib/projects-store";
@@ -12,9 +20,20 @@ import { emptyTopic, type Topic } from "@/lib/types";
 import {
   createFreshReport,
   createSupabaseRepositories,
+  listReports,
+  loadReportTopics,
   runMigrationIfNeeded,
+  type Report,
 } from "@/lib/repository";
 import { supabase } from "@/lib/supabase";
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("he-IL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
+}
 
 export const Route = createFileRoute("/")({
   beforeLoad: async () => {
@@ -43,13 +62,21 @@ function Index() {
   const [saving, setSaving] = useState(false);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [allReports, setAllReports] = useState<Report[]>([]);
+  const [currentReportId, setCurrentReportId] = useState<string | null>(null);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [historyTopics, setHistoryTopics] = useState<Topic[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
         await runMigrationIfNeeded();
-        const { topics: repo } = await createSupabaseRepositories();
+        const { topics: repo, report } = await createSupabaseRepositories();
+        setCurrentReportId(report.id);
         setTopics(await repo.list());
+        const reports = await listReports();
+        setAllReports(reports);
       } catch (e) {
         console.error("Supabase load failed, falling back to localStorage:", e);
         setTopics(topicsStore.list());
@@ -160,13 +187,35 @@ function Index() {
     }
   };
 
+  const isViewingHistory =
+    selectedReportId !== null && selectedReportId !== currentReportId;
+
+  const handleReportSelect = async (reportId: string) => {
+    if (reportId === currentReportId) {
+      setSelectedReportId(null);
+      setHistoryTopics([]);
+      return;
+    }
+    setSelectedReportId(reportId);
+    setLoadingHistory(true);
+    try {
+      setHistoryTopics(await loadReportTopics(reportId));
+    } catch (e) {
+      console.error("Failed to load historical report:", e);
+      toast.error("שגיאה בטעינת הדוח");
+      setSelectedReportId(null);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/login" });
   };
 
   const exportXlsx = () => {
-    exportTopicsToExcel(filtered);
+    exportTopicsToExcel(isViewingHistory ? historyTopics : filtered);
     toast.success("הקובץ יוצא");
   };
 
@@ -189,6 +238,8 @@ function Index() {
   const reviewedCount = topics.filter((t) => t.reviewed).length;
   const changedCount = topics.filter((t) => t.changedSincePrevious).length;
 
+  const selectedReport = allReports.find((r) => r.id === selectedReportId);
+
   return (
     <div className="min-h-screen bg-background">
       <Toaster position="top-center" dir="rtl" />
@@ -199,43 +250,74 @@ function Index() {
               דיווח שבועי
             </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {loaded
-                ? `${filtered.length} מתוך ${topics.length} נושאים · ${reviewedCount} נסקרו · ${changedCount} עם שינוי`
-                : "טוען…"}
+              {!loaded
+                ? "טוען…"
+                : isViewingHistory
+                  ? loadingHistory
+                    ? "טוען דוח..."
+                    : `שבוע ${selectedReport ? formatDate(selectedReport.weekStart) : ""} · ${historyTopics.length} נושאים · לקריאה בלבד`
+                  : `${filtered.length} מתוך ${topics.length} נושאים · ${reviewedCount} נסקרו · ${changedCount} עם שינוי`}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm">
-              {dirty ? (
-                <span className="text-amber-500">● שינויים לא שמורים</span>
-              ) : lastSavedAt ? (
-                <span className="text-emerald-600">
-                  ✓ נשמר{" "}
-                  {lastSavedAt.toLocaleTimeString("he-IL", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              ) : (
-                <span className="text-muted-foreground">עדכני</span>
-              )}
-            </span>
-            <Button variant="outline" size="sm" onClick={addTopic}>
-              <Plus className="ms-1 h-4 w-4" />
-              נושא חדש
-            </Button>
+            {allReports.length > 1 && (
+              <Select
+                value={selectedReportId ?? currentReportId ?? ""}
+                onValueChange={handleReportSelect}
+              >
+                <SelectTrigger className="h-8 w-52 text-sm">
+                  <SelectValue placeholder="בחר שבוע" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allReports.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.id === currentReportId
+                        ? `השבוע הנוכחי (${formatDate(r.weekStart)})`
+                        : formatDate(r.weekStart)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {!isViewingHistory && (
+              <span className="text-sm">
+                {dirty ? (
+                  <span className="text-amber-500">● שינויים לא שמורים</span>
+                ) : lastSavedAt ? (
+                  <span className="text-emerald-600">
+                    ✓ נשמר{" "}
+                    {lastSavedAt.toLocaleTimeString("he-IL", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">עדכני</span>
+                )}
+              </span>
+            )}
+            {!isViewingHistory && (
+              <Button variant="outline" size="sm" onClick={addTopic}>
+                <Plus className="ms-1 h-4 w-4" />
+                נושא חדש
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={exportXlsx}>
               <Download className="ms-1 h-4 w-4" />
               ייצוא ל-Excel
             </Button>
-            <Button variant="outline" size="sm" onClick={rolloverWeek} disabled={saving}>
-              <RefreshCw className="ms-1 h-4 w-4" />
-              פתח שבוע חדש
-            </Button>
-            <Button size="sm" onClick={save} disabled={!dirty || saving}>
-              <Save className="ms-1 h-4 w-4" />
-              {saving ? "שומר..." : "שמור הכל"}
-            </Button>
+            {!isViewingHistory && (
+              <Button variant="outline" size="sm" onClick={rolloverWeek} disabled={saving}>
+                <RefreshCw className="ms-1 h-4 w-4" />
+                פתח שבוע חדש
+              </Button>
+            )}
+            {!isViewingHistory && (
+              <Button size="sm" onClick={save} disabled={!dirty || saving}>
+                <Save className="ms-1 h-4 w-4" />
+                {saving ? "שומר..." : "שמור הכל"}
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={logout} title="התנתק">
               <LogOut className="h-4 w-4" />
             </Button>
@@ -243,14 +325,20 @@ function Index() {
         </div>
       </header>
       <main className="mx-auto max-w-[1400px] px-6 py-6">
-        <FilterBar value={filters} onChange={setFilters} />
-        <TopicsTable
-          topics={filtered}
-          onChange={updateTopic}
-          onDelete={deleteTopic}
-          onSave={save}
-          onReorder={reorderTopics}
-        />
+        {isViewingHistory ? (
+          <HistoryViewer topics={historyTopics} />
+        ) : (
+          <>
+            <FilterBar value={filters} onChange={setFilters} />
+            <TopicsTable
+              topics={filtered}
+              onChange={updateTopic}
+              onDelete={deleteTopic}
+              onSave={save}
+              onReorder={reorderTopics}
+            />
+          </>
+        )}
       </main>
     </div>
   );
