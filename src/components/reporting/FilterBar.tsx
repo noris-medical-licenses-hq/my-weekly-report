@@ -47,7 +47,7 @@ const YN = [
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex w-40 flex-col gap-1">
       <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
       {children}
     </div>
@@ -61,10 +61,10 @@ export function FilterBar({ value, onChange }: Props) {
 
   return (
     <div className="mb-3 rounded-md border border-border bg-card p-3">
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-2">
         <Field label="קבוצה">
           <Select value={value.group} onValueChange={(v) => set("group", v as Group | "all")}>
-            <SelectTrigger className="h-8 w-56 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">הכל</SelectItem>
               {GROUPS.map((g) => (
@@ -75,7 +75,7 @@ export function FilterBar({ value, onChange }: Props) {
         </Field>
         <Field label="עדיפות">
           <Select value={value.priority} onValueChange={(v) => set("priority", v as Priority | "all")}>
-            <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">הכל</SelectItem>
               {(Object.keys(PRIORITY_LABELS) as Priority[]).map((p) => (
@@ -86,7 +86,7 @@ export function FilterBar({ value, onChange }: Props) {
         </Field>
         <Field label="סטטוס">
           <Select value={value.status} onValueChange={(v) => set("status", v as ProjectStatus | "all")}>
-            <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">הכל</SelectItem>
               {(Object.keys(STATUS_LABELS) as ProjectStatus[]).map((s) => (
@@ -97,7 +97,7 @@ export function FilterBar({ value, onChange }: Props) {
         </Field>
         <Field label="דורש תמיכה">
           <Select value={value.supportRequired} onValueChange={(v) => set("supportRequired", v as "all" | "yes" | "no")}>
-            <SelectTrigger className="h-8 w-24 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               {YN.map((y) => <SelectItem key={y.v} value={y.v} className="text-xs">{y.l}</SelectItem>)}
             </SelectContent>
@@ -105,7 +105,7 @@ export function FilterBar({ value, onChange }: Props) {
         </Field>
         <Field label="נסקר">
           <Select value={value.reviewed} onValueChange={(v) => set("reviewed", v as "all" | "yes" | "no")}>
-            <SelectTrigger className="h-8 w-24 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               {YN.map((y) => <SelectItem key={y.v} value={y.v} className="text-xs">{y.l}</SelectItem>)}
             </SelectContent>
@@ -113,7 +113,7 @@ export function FilterBar({ value, onChange }: Props) {
         </Field>
         <Field label="שינוי מהדוח הקודם">
           <Select value={value.changed} onValueChange={(v) => set("changed", v as "all" | "yes" | "no")}>
-            <SelectTrigger className="h-8 w-24 text-xs"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               {YN.map((y) => <SelectItem key={y.v} value={y.v} className="text-xs">{y.l}</SelectItem>)}
             </SelectContent>
