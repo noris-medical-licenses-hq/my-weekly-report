@@ -1,4 +1,5 @@
-import { ChevronDown, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ interface TopicRowProps {
   onToggle: () => void;
   onChange: (patch: Partial<Topic>) => void;
   onDelete: () => void;
+  onSave: () => void;
 }
 
 export function TopicRow({
@@ -37,7 +39,20 @@ export function TopicRow({
   onToggle,
   onChange,
   onDelete,
+  onSave,
 }: TopicRowProps) {
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
+
+  const handleChange = (patch: Partial<Topic>) => {
+    setSavedAt(null);
+    onChange(patch);
+  };
+
+  const handleSave = () => {
+    onSave();
+    setSavedAt(new Date());
+  };
+
   const cell = "border-s border-border px-2 py-1 align-middle";
   return (
     <>
@@ -64,7 +79,7 @@ export function TopicRow({
           {expanded ? (
             <Select
               value={topic.group}
-              onValueChange={(v) => onChange({ group: v as Group })}
+              onValueChange={(v) => handleChange({ group: v as Group })}
             >
               <SelectTrigger className="h-7 w-full text-xs">
                 <SelectValue />
@@ -85,7 +100,7 @@ export function TopicRow({
           {expanded ? (
             <Input
               value={topic.topic}
-              onChange={(e) => onChange({ topic: e.target.value })}
+              onChange={(e) => handleChange({ topic: e.target.value })}
               placeholder="נושא"
               className="h-7 text-sm"
             />
@@ -98,7 +113,7 @@ export function TopicRow({
         <td className={cn(cell, "text-center")}>
           <Checkbox
             checked={topic.changedSincePrevious}
-            onCheckedChange={(v) => onChange({ changedSincePrevious: v === true })}
+            onCheckedChange={(v) => handleChange({ changedSincePrevious: v === true })}
             aria-label="שינוי מהדוח הקודם"
           />
         </td>
@@ -106,7 +121,7 @@ export function TopicRow({
           {expanded ? (
             <Select
               value={topic.priority}
-              onValueChange={(v) => onChange({ priority: v as Priority })}
+              onValueChange={(v) => handleChange({ priority: v as Priority })}
             >
               <SelectTrigger className="h-7 w-full text-xs">
                 <SelectValue />
@@ -127,7 +142,7 @@ export function TopicRow({
           <Checkbox
             checked={!!topic.supportRequired?.trim()}
             onCheckedChange={(v) =>
-              onChange({ supportRequired: v === true ? topic.supportRequired || " " : "" })
+              handleChange({ supportRequired: v === true ? topic.supportRequired || " " : "" })
             }
             aria-label="דורש תמיכה"
           />
@@ -135,7 +150,7 @@ export function TopicRow({
         <td className={cn(cell, "text-center")}>
           <Checkbox
             checked={topic.reviewed}
-            onCheckedChange={(v) => onChange({ reviewed: v === true })}
+            onCheckedChange={(v) => handleChange({ reviewed: v === true })}
             aria-label="נסקר"
           />
         </td>
@@ -143,7 +158,7 @@ export function TopicRow({
           {expanded ? (
             <Select
               value={topic.status}
-              onValueChange={(v) => onChange({ status: v as ProjectStatus })}
+              onValueChange={(v) => handleChange({ status: v as ProjectStatus })}
             >
               <SelectTrigger className="h-7 w-full text-xs">
                 <SelectValue />
@@ -187,27 +202,42 @@ export function TopicRow({
                 id={`${topic.id}-curr`}
                 label="עדכון שבוע נוכחי"
                 value={topic.currentWeekUpdate}
-                onChange={(v) => onChange({ currentWeekUpdate: v })}
+                onChange={(v) => handleChange({ currentWeekUpdate: v })}
                 rows={4}
               />
               <FieldBlock
                 id={`${topic.id}-risk`}
                 label="סיכונים ואתגרים"
                 value={topic.risksAndChallenges}
-                onChange={(v) => onChange({ risksAndChallenges: v })}
+                onChange={(v) => handleChange({ risksAndChallenges: v })}
               />
               <FieldBlock
                 id={`${topic.id}-next`}
                 label="עדיפות לשבוע הבא"
                 value={topic.nextWeekPriority}
-                onChange={(v) => onChange({ nextWeekPriority: v })}
+                onChange={(v) => handleChange({ nextWeekPriority: v })}
               />
               <FieldBlock
                 id={`${topic.id}-support`}
                 label="תמיכה נדרשת"
                 value={topic.supportRequired}
-                onChange={(v) => onChange({ supportRequired: v })}
+                onChange={(v) => handleChange({ supportRequired: v })}
               />
+            </div>
+            <div className="flex items-center justify-end gap-3 border-t border-border pt-3 mt-1">
+              {savedAt && (
+                <span className="text-xs text-emerald-600">
+                  ✓ נשמר{" "}
+                  {savedAt.toLocaleTimeString("he-IL", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              )}
+              <Button size="sm" onClick={handleSave}>
+                <Save className="ms-1 h-3 w-3" />
+                שמור
+              </Button>
             </div>
           </td>
         </tr>

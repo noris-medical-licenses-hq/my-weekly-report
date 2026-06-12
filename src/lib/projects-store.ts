@@ -9,6 +9,19 @@ import { SEED_TOPICS } from "./seed-data";
 
 const STORAGE_KEY = "weekly-reporting:topics:v3";
 
+function migrateFields(topics: Topic[]): Topic[] {
+  let changed = false;
+  const result = topics.map((t) => {
+    if (!t.previousWeekUpdate && t.currentWeekUpdate) {
+      changed = true;
+      return { ...t, previousWeekUpdate: t.currentWeekUpdate, currentWeekUpdate: "" };
+    }
+    return t;
+  });
+  if (changed) write(result);
+  return result;
+}
+
 function read(): Topic[] {
   if (typeof window === "undefined") return [];
   try {
@@ -17,7 +30,7 @@ function read(): Topic[] {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_TOPICS));
       return SEED_TOPICS;
     }
-    return JSON.parse(raw) as Topic[];
+    return migrateFields(JSON.parse(raw) as Topic[]);
   } catch {
     return SEED_TOPICS;
   }

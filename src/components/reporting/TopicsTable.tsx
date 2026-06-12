@@ -6,9 +6,10 @@ interface TopicsTableProps {
   topics: Topic[];
   onChange: (id: string, patch: Partial<Topic>) => void;
   onDelete: (id: string) => void;
+  onSave: () => void;
 }
 
-export function TopicsTable({ topics, onChange, onDelete }: TopicsTableProps) {
+export function TopicsTable({ topics, onChange, onDelete, onSave }: TopicsTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (topics.length === 0) {
@@ -50,6 +51,7 @@ export function TopicsTable({ topics, onChange, onDelete }: TopicsTableProps) {
               onToggle={() => setExpandedId(expandedId === t.id ? null : t.id)}
               onChange={(patch) => onChange(t.id, patch)}
               onDelete={() => onDelete(t.id)}
+              onSave={onSave}
             />
           ))}
         </tbody>

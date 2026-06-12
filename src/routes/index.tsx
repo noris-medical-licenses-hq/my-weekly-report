@@ -27,6 +27,7 @@ function Index() {
   const [dirty, setDirty] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     setTopics(topicsStore.list());
@@ -55,6 +56,8 @@ function Index() {
 
   const save = () => {
     topicsStore.saveAll(topics);
+    const now = new Date();
+    setLastSavedAt(now);
     setDirty(false);
     toast.success("הדיווח נשמר");
   };
@@ -98,7 +101,22 @@ function Index() {
                 : "טוען…"}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm">
+              {dirty ? (
+                <span className="text-amber-500">● שינויים לא שמורים</span>
+              ) : lastSavedAt ? (
+                <span className="text-emerald-600">
+                  ✓ נשמר{" "}
+                  {lastSavedAt.toLocaleTimeString("he-IL", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">עדכני</span>
+              )}
+            </span>
             <Button variant="outline" size="sm" onClick={addTopic}>
               <Plus className="ms-1 h-4 w-4" />
               נושא חדש
@@ -109,7 +127,7 @@ function Index() {
             </Button>
             <Button size="sm" onClick={save} disabled={!dirty}>
               <Save className="ms-1 h-4 w-4" />
-              {dirty ? "שמור שינויים" : "נשמר"}
+              שמור הכל
             </Button>
           </div>
         </div>
@@ -120,6 +138,7 @@ function Index() {
           topics={filtered}
           onChange={updateTopic}
           onDelete={deleteTopic}
+          onSave={save}
         />
       </main>
     </div>

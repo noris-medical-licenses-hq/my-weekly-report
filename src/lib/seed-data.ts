@@ -6,7 +6,7 @@ const make = (t: Omit<Topic, "id" | "updatedAt">): Topic => ({
   updatedAt: new Date().toISOString(),
 });
 
-export const SEED_TOPICS: Topic[] = [
+const rawTopics: Topic[] = [
   make({
     group: `מחשוב / תשתיות / פרויקטים`,
     topic: `שרת ענן`,
@@ -851,3 +851,9 @@ export const SEED_TOPICS: Topic[] = [
     supportRequired: ``,
   }),
 ];
+
+export const SEED_TOPICS: Topic[] = rawTopics.map((t) => ({
+  ...t,
+  previousWeekUpdate: t.currentWeekUpdate,
+  currentWeekUpdate: "",
+}));
