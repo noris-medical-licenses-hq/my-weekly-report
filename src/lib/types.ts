@@ -7,6 +7,14 @@ export const STATUS_LABELS: Record<ProjectStatus, string> = {
   done: "הושלם",
 };
 
+export type Priority = "high" | "medium" | "low";
+
+export const PRIORITY_LABELS: Record<Priority, string> = {
+  high: "גבוהה",
+  medium: "בינונית",
+  low: "נמוכה",
+};
+
 export const GROUPS = [
   "מחשוב / תשתיות / פרויקטים",
   "משאבי אנוש",
@@ -20,6 +28,7 @@ export interface Topic {
   group: Group;
   topic: string;
   status: ProjectStatus;
+  priority: Priority;
   changedSincePrevious: boolean;
   reviewed: boolean;
   previousWeekUpdate: string;
@@ -35,6 +44,7 @@ export const emptyTopic = (): Topic => ({
   group: GROUPS[0],
   topic: "",
   status: "on_track",
+  priority: "medium",
   changedSincePrevious: false,
   reviewed: false,
   previousWeekUpdate: "",
