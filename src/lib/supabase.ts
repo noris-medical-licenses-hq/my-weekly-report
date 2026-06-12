@@ -7,7 +7,13 @@ const supabaseAnonKey = (
   ""
 ) as string;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+});
 
 export async function verifyConnection(): Promise<{ ok: boolean; error?: string }> {
   try {

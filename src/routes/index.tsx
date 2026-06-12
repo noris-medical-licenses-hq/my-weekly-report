@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Download, Plus, RefreshCw, Save } from "lucide-react";
+import { Download, LogOut, Plus, RefreshCw, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,16 @@ import {
   createSupabaseRepositories,
   runMigrationIfNeeded,
 } from "@/lib/repository";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: async () => {
+    if (typeof window === "undefined") return;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) throw redirect({ to: "/login" });
+  },
   head: () => ({
     meta: [
       { title: "דיווח שבועי" },
@@ -28,6 +36,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const navigate = useNavigate();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [dirty, setDirty] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -151,6 +160,11 @@ function Index() {
     }
   };
 
+  const logout = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/login" });
+  };
+
   const exportXlsx = () => {
     exportTopicsToExcel(filtered);
     toast.success("הקובץ יוצא");
@@ -221,6 +235,9 @@ function Index() {
             <Button size="sm" onClick={save} disabled={!dirty || saving}>
               <Save className="ms-1 h-4 w-4" />
               {saving ? "שומר..." : "שמור הכל"}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={logout} title="התנתק">
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
