@@ -2,9 +2,9 @@ import { STATUS_LABELS, type ProjectStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const STYLES: Record<ProjectStatus, string> = {
-  on_track: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  at_risk: "bg-amber-50 text-amber-700 ring-amber-200",
-  blocked: "bg-red-50 text-red-700 ring-red-200",
+  on_track: "bg-emerald-100 text-emerald-800 ring-emerald-300",
+  at_risk: "bg-amber-100 text-amber-800 ring-amber-300",
+  blocked: "bg-red-100 text-red-900 ring-red-400",
   done: "bg-slate-100 text-slate-600 ring-slate-200",
 };
 

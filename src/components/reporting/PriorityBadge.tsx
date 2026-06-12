@@ -2,8 +2,8 @@ import { PRIORITY_LABELS, type Priority } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const STYLES: Record<Priority, string> = {
-  high: "bg-red-50 text-red-700 ring-red-200",
-  medium: "bg-amber-50 text-amber-700 ring-amber-200",
+  high: "bg-rose-100 text-rose-800 ring-rose-300",
+  medium: "bg-amber-100 text-amber-800 ring-amber-300",
   low: "bg-slate-100 text-slate-600 ring-slate-200",
 };
 
