@@ -24,7 +24,7 @@ export function TopicsTable({ topics, onChange, onDelete }: TopicsTableProps) {
   return (
     <div className="rounded-md border border-border bg-card">
       <table className="w-full border-collapse text-right">
-        <thead className="sticky top-0 z-20 bg-muted text-[11px] uppercase tracking-wide text-muted-foreground shadow-[0_1px_0_0_hsl(var(--border)),0_2px_4px_-2px_rgba(0,0,0,0.08)]">
+        <thead className="sticky top-0 z-20 bg-muted text-[11px] uppercase tracking-wide text-muted-foreground shadow-[0_2px_4px_-2px_rgba(0,0,0,0.12)]">
           <tr>
             <th className="w-8 border-s border-b border-border" />
             <th className={`${th} w-44 border-b`}>קבוצה</th>
