@@ -1,22 +1,24 @@
 import * as XLSX from "xlsx";
-import { STATUS_LABELS, type Project } from "./types";
+import { STATUS_LABELS, type Topic } from "./types";
 
-export function exportProjectsToExcel(projects: Project[]): void {
-  const rows = projects.map((p) => ({
-    "שם פרויקט": p.name,
-    סטטוס: STATUS_LABELS[p.status],
-    "נסקר השבוע": p.reviewedThisWeek ? "כן" : "לא",
-    "עדכון שבוע קודם": p.previousWeekUpdate,
-    "עדכון שבוע נוכחי": p.currentWeekUpdate,
-    חסמים: p.blockers,
-    "סיוע נדרש ממנכ״ל": p.helpNeededFromCeo,
-    "פעולה הבאה": p.nextAction,
+export function exportTopicsToExcel(topics: Topic[]): void {
+  const rows = topics.map((t) => ({
+    קבוצה: t.group,
+    נושא: t.topic,
+    'שינוי מהדוח הקודם': t.changedSincePrevious ? "כן" : "לא",
+    נסקר: t.reviewed ? "כן" : "לא",
+    סטטוס: STATUS_LABELS[t.status],
+    "עדכון שבוע קודם": t.previousWeekUpdate,
+    "עדכון שבוע נוכחי": t.currentWeekUpdate,
+    "סיכונים ואתגרים": t.risksAndChallenges,
+    "עדיפות לשבוע הבא": t.nextWeekPriority,
+    "תמיכה נדרשת": t.supportRequired,
   }));
 
   const ws = XLSX.utils.json_to_sheet(rows);
   ws["!cols"] = [
-    { wch: 22 }, { wch: 12 }, { wch: 12 }, { wch: 40 },
-    { wch: 40 }, { wch: 30 }, { wch: 30 }, { wch: 30 },
+    { wch: 24 }, { wch: 28 }, { wch: 14 }, { wch: 10 }, { wch: 12 },
+    { wch: 40 }, { wch: 40 }, { wch: 36 }, { wch: 30 }, { wch: 30 },
   ];
   if (!ws["!views"]) ws["!views"] = [{}];
   ws["!views"][0]!.RTL = true;
