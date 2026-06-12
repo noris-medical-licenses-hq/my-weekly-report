@@ -1,26 +1,12 @@
 import type { Topic } from "./types";
 import { SEED_TOPICS } from "./seed-data";
 
-/**
- * Data layer abstraction.
- * Currently backed by localStorage. Swap implementation for Supabase later
- * by replacing the function bodies — signatures stay the same.
- */
+// localStorage is a cache/fallback only. Supabase is the source of truth.
+// Do NOT add any automatic field transformation here — a previous migrateFields()
+// function silently moved currentWeekUpdate → previousWeekUpdate on every
+// startup where Supabase failed, corrupting live report data (incident: 2026-06-12).
 
 const STORAGE_KEY = "weekly-reporting:topics:v3";
-
-function migrateFields(topics: Topic[]): Topic[] {
-  let changed = false;
-  const result = topics.map((t) => {
-    if (!t.previousWeekUpdate && t.currentWeekUpdate) {
-      changed = true;
-      return { ...t, previousWeekUpdate: t.currentWeekUpdate, currentWeekUpdate: "" };
-    }
-    return t;
-  });
-  if (changed) write(result);
-  return result;
-}
 
 function read(): Topic[] {
   if (typeof window === "undefined") return [];
@@ -30,7 +16,7 @@ function read(): Topic[] {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_TOPICS));
       return SEED_TOPICS;
     }
-    return migrateFields(JSON.parse(raw) as Topic[]);
+    return JSON.parse(raw) as Topic[];
   } catch {
     return SEED_TOPICS;
   }
@@ -49,18 +35,3 @@ export const topicsStore = {
     write(topics);
   },
 };
-
-/**
- * Roll over: move the current week's update into "previous week" and clear
- * current-week fields. Not auto-invoked — exposed for future weekly cron.
- */
-export function rolloverWeek(topics: Topic[]): Topic[] {
-  return topics.map((p) => ({
-    ...p,
-    previousWeekUpdate: p.currentWeekUpdate,
-    currentWeekUpdate: "",
-    reviewed: false,
-    changedSincePrevious: false,
-    updatedAt: new Date().toISOString(),
-  }));
-}

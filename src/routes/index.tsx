@@ -154,6 +154,9 @@ function Index() {
     }
   };
 
+  // Safety guarantee: topic data is never modified unless createFreshReport() succeeds.
+  // If report creation or saveAll throws, the catch aborts before any local state or
+  // localStorage is touched — preventing a partial rollover.
   const rolloverWeek = async () => {
     if (
       !window.confirm(
@@ -164,6 +167,10 @@ function Index() {
 
     setSaving(true);
     try {
+      // createFreshReport() must succeed (new Supabase report row created) before
+      // any topic data is transformed or persisted.
+      const { topics: repo } = await createFreshReport();
+
       const rolled = topics.map((t) => ({
         ...t,
         previousWeekUpdate: t.currentWeekUpdate,
@@ -171,7 +178,6 @@ function Index() {
         updatedAt: new Date().toISOString(),
       }));
 
-      const { topics: repo } = await createFreshReport();
       await repo.saveAll(rolled);
       topicsStore.saveAll(rolled);
 
