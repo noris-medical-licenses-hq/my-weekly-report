@@ -1,4 +1,5 @@
-import type { Project } from "./types";
+import type { Topic } from "./types";
+import { SEED_TOPICS } from "./seed-data";
 
 /**
  * Data layer abstraction.
@@ -6,30 +7,33 @@ import type { Project } from "./types";
  * by replacing the function bodies — signatures stay the same.
  */
 
-const STORAGE_KEY = "weekly-reporting:projects:v1";
+const STORAGE_KEY = "weekly-reporting:topics:v2";
 
-function read(): Project[] {
+function read(): Topic[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Project[];
+    if (!raw) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_TOPICS));
+      return SEED_TOPICS;
+    }
+    return JSON.parse(raw) as Topic[];
   } catch {
-    return [];
+    return SEED_TOPICS;
   }
 }
 
-function write(projects: Project[]): void {
+function write(topics: Topic[]): void {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(topics));
 }
 
-export const projectsStore = {
-  list(): Project[] {
+export const topicsStore = {
+  list(): Topic[] {
     return read();
   },
-  saveAll(projects: Project[]): void {
-    write(projects);
+  saveAll(topics: Topic[]): void {
+    write(topics);
   },
 };
 
@@ -37,12 +41,13 @@ export const projectsStore = {
  * Roll over: move the current week's update into "previous week" and clear
  * current-week fields. Not auto-invoked — exposed for future weekly cron.
  */
-export function rolloverWeek(projects: Project[]): Project[] {
-  return projects.map((p) => ({
+export function rolloverWeek(topics: Topic[]): Topic[] {
+  return topics.map((p) => ({
     ...p,
     previousWeekUpdate: p.currentWeekUpdate,
     currentWeekUpdate: "",
-    reviewedThisWeek: false,
+    reviewed: false,
+    changedSincePrevious: false,
     updatedAt: new Date().toISOString(),
   }));
 }
