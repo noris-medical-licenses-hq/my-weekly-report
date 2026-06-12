@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { ChevronDown, Save, Trash2 } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ChevronDown, GripVertical, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -43,6 +45,23 @@ export function TopicRow({
 }: TopicRowProps) {
   const [savedAt, setSavedAt] = useState<Date | null>(null);
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: topic.id });
+
+  const dragStyle: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    position: isDragging ? "relative" : undefined,
+    zIndex: isDragging ? 9 : undefined,
+  };
+
   const handleChange = (patch: Partial<Topic>) => {
     setSavedAt(null);
     onChange(patch);
@@ -54,14 +73,30 @@ export function TopicRow({
   };
 
   const cell = "border-s border-border px-2 py-1 align-middle";
+
   return (
     <>
       <tr
+        ref={setNodeRef}
+        style={dragStyle}
         className={cn(
           "border-b border-border transition-colors hover:bg-muted/40",
           expanded && "bg-muted/30",
         )}
       >
+        {/* drag handle */}
+        <td className="w-8 border-s border-border px-0.5 py-1 align-middle">
+          <button
+            {...listeners}
+            {...attributes}
+            type="button"
+            aria-label="גרור לשינוי סדר"
+            className="flex h-6 w-6 cursor-grab items-center justify-center rounded text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+        </td>
+        {/* expand toggle */}
         <td className="w-8 border-s border-border px-0.5 py-1 align-middle">
           <Button
             variant="ghost"
@@ -189,7 +224,7 @@ export function TopicRow({
       </tr>
       {expanded && (
         <tr className="border-b border-border bg-muted/20">
-          <td colSpan={9} className="px-6 py-5">
+          <td colSpan={10} className="px-6 py-5">
             <div className="grid gap-4 md:grid-cols-2">
               <FieldBlock
                 id={`${topic.id}-prev`}

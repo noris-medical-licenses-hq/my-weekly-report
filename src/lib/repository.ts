@@ -65,6 +65,7 @@ interface TopicRow {
   priority: string;
   status: string;
   changed_since_previous: boolean;
+  sort_order?: number;
   created_at: string;
   updated_at: string;
 }
@@ -173,7 +174,7 @@ export class SupabaseTopicRepository implements TopicRepository {
       .from("topics")
       .select("*")
       .eq("report_id", this.reportId)
-      .order("created_at", { ascending: true });
+      .order("sort_order", { ascending: true });
 
     if (error) throw new Error(`Failed to load topics: ${error.message}`);
     return (data as TopicRow[]).map(rowToTopic);
@@ -188,7 +189,7 @@ export class SupabaseTopicRepository implements TopicRepository {
 
     if (topics.length === 0) return;
 
-    const rows = topics.map((t) => topicToRow(t, this.reportId));
+    const rows = topics.map((t, i) => ({ ...topicToRow(t, this.reportId), sort_order: i }));
     const { error: insErr } = await supabase.from("topics").insert(rows);
     if (insErr) throw new Error(`Failed to save topics: ${insErr.message}`);
   }

@@ -57,6 +57,7 @@ async function main() {
     support_required: t.supportRequired,
     updated_at: t.updatedAt,
     created_at: new Date(base + i).toISOString(),
+    sort_order: i,
   }));
 
   // 4. Insert all topics

@@ -92,6 +92,32 @@ function Index() {
     }
   };
 
+  const reorderTopics = async (newVisibleOrder: Topic[]) => {
+    // Merge the reordered visible subset back into the full topics array.
+    // Hidden (filtered-out) topics stay in their current relative positions.
+    const visibleIdSet = new Set(newVisibleOrder.map((t) => t.id));
+    const filteredIndices = topics
+      .map((t, i) => ({ t, i }))
+      .filter(({ t }) => visibleIdSet.has(t.id))
+      .map(({ i }) => i);
+
+    const newTopics = [...topics];
+    filteredIndices.forEach((topicsIdx, pos) => {
+      newTopics[topicsIdx] = newVisibleOrder[pos];
+    });
+
+    setTopics(newTopics);
+
+    try {
+      const { topics: repo } = await createSupabaseRepositories();
+      await repo.saveAll(newTopics);
+      topicsStore.saveAll(newTopics);
+    } catch (e) {
+      console.error("Failed to persist reorder:", e);
+      topicsStore.saveAll(newTopics);
+    }
+  };
+
   const rolloverWeek = async () => {
     if (
       !window.confirm(
@@ -206,6 +232,7 @@ function Index() {
           onChange={updateTopic}
           onDelete={deleteTopic}
           onSave={save}
+          onReorder={reorderTopics}
         />
       </main>
     </div>
