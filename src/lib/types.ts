@@ -33,6 +33,7 @@ export interface Topic {
   reviewed: boolean;
   previousWeekUpdate: string;
   currentWeekUpdate: string;
+  managerComment: string;
   risksAndChallenges: string;
   nextWeekPriority: string;
   supportRequired: string;
@@ -49,6 +50,7 @@ export const emptyTopic = (): Topic => ({
   reviewed: false,
   previousWeekUpdate: "",
   currentWeekUpdate: "",
+  managerComment: "",
   risksAndChallenges: "",
   nextWeekPriority: "",
   supportRequired: "",

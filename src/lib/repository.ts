@@ -58,6 +58,7 @@ interface TopicRow {
   topic_name: string;
   previous_week_update: string;
   current_week_update: string;
+  manager_comment: string | null;
   risks_and_challenges: string;
   next_week_priority: string;
   support_required: string;
@@ -93,6 +94,7 @@ function rowToTopic(row: TopicRow): Topic {
     reviewed: row.reviewed,
     previousWeekUpdate: row.previous_week_update,
     currentWeekUpdate: row.current_week_update,
+    managerComment: row.manager_comment ?? "",
     risksAndChallenges: row.risks_and_challenges,
     nextWeekPriority: row.next_week_priority,
     supportRequired: row.support_required,
@@ -112,6 +114,7 @@ function topicToRow(topic: Topic, reportId: string): Omit<TopicRow, "created_at"
     reviewed: topic.reviewed,
     previous_week_update: topic.previousWeekUpdate,
     current_week_update: topic.currentWeekUpdate,
+    manager_comment: topic.managerComment,
     risks_and_challenges: topic.risksAndChallenges,
     next_week_priority: topic.nextWeekPriority,
     support_required: topic.supportRequired,

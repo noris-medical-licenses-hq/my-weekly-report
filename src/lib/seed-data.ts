@@ -1,6 +1,7 @@
 import type { Topic } from "./types";
 
-const make = (t: Omit<Topic, "id" | "updatedAt">): Topic => ({
+const make = (t: Omit<Topic, "id" | "updatedAt" | "managerComment">): Topic => ({
+  managerComment: "",
   ...t,
   id: crypto.randomUUID(),
   updatedAt: new Date().toISOString(),

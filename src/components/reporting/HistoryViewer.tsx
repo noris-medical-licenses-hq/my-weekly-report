@@ -94,6 +94,11 @@ export function HistoryViewer({ topics }: HistoryViewerProps) {
                       <div className="grid gap-4 md:grid-cols-2">
                         <ReadField label="עדכון שבוע קודם" value={t.previousWeekUpdate} />
                         <ReadField label="עדכון שבוע נוכחי" value={t.currentWeekUpdate} />
+                        {t.managerComment && (
+                          <div className="md:col-span-2">
+                            <ReadField label="הערת מנהל" value={t.managerComment} />
+                          </div>
+                        )}
                         {t.risksAndChallenges && (
                           <ReadField label="סיכונים ואתגרים" value={t.risksAndChallenges} />
                         )}

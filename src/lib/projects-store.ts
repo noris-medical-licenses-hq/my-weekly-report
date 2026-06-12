@@ -16,7 +16,8 @@ function read(): Topic[] {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_TOPICS));
       return SEED_TOPICS;
     }
-    return JSON.parse(raw) as Topic[];
+    // Spread default before topic data so existing entries with the field override it.
+    return (JSON.parse(raw) as Topic[]).map((t) => ({ managerComment: "", ...t }));
   } catch {
     return SEED_TOPICS;
   }

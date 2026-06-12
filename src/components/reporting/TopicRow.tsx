@@ -240,6 +240,16 @@ export function TopicRow({
                 onChange={(v) => handleChange({ currentWeekUpdate: v })}
                 rows={4}
               />
+              <div className="md:col-span-2">
+                <FieldBlock
+                  id={`${topic.id}-manager`}
+                  label="הערת מנהל"
+                  value={topic.managerComment}
+                  onChange={(v) => handleChange({ managerComment: v })}
+                  rows={3}
+                  placeholder="הזן הערת מנהל..."
+                />
+              </div>
               <FieldBlock
                 id={`${topic.id}-risk`}
                 label="סיכונים ואתגרים"
