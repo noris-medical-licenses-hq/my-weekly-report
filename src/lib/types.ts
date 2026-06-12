@@ -7,28 +7,40 @@ export const STATUS_LABELS: Record<ProjectStatus, string> = {
   done: "הושלם",
 };
 
-export interface Project {
+export const GROUPS = [
+  "מחשוב / תשתיות / פרויקטים",
+  "משאבי אנוש",
+  "סטאטוס מחסנים גלובלי",
+  "שרשרת אספקה / ספקים / ייצור",
+] as const;
+export type Group = (typeof GROUPS)[number];
+
+export interface Topic {
   id: string;
-  name: string;
+  group: Group;
+  topic: string;
   status: ProjectStatus;
-  reviewedThisWeek: boolean;
+  changedSincePrevious: boolean;
+  reviewed: boolean;
   previousWeekUpdate: string;
   currentWeekUpdate: string;
-  blockers: string;
-  helpNeededFromCeo: string;
-  nextAction: string;
+  risksAndChallenges: string;
+  nextWeekPriority: string;
+  supportRequired: string;
   updatedAt: string;
 }
 
-export const emptyProject = (): Project => ({
+export const emptyTopic = (): Topic => ({
   id: crypto.randomUUID(),
-  name: "",
+  group: GROUPS[0],
+  topic: "",
   status: "on_track",
-  reviewedThisWeek: false,
+  changedSincePrevious: false,
+  reviewed: false,
   previousWeekUpdate: "",
   currentWeekUpdate: "",
-  blockers: "",
-  helpNeededFromCeo: "",
-  nextAction: "",
+  risksAndChallenges: "",
+  nextWeekPriority: "",
+  supportRequired: "",
   updatedAt: new Date().toISOString(),
 });
