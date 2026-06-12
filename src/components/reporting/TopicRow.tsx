@@ -38,7 +38,7 @@ export function TopicRow({
   onChange,
   onDelete,
 }: TopicRowProps) {
-  const cell = "border-s border-border px-2 py-1.5 align-middle";
+  const cell = "border-s border-border px-2 py-1 align-middle";
   return (
     <>
       <tr
@@ -47,13 +47,13 @@ export function TopicRow({
           expanded && "bg-muted/30",
         )}
       >
-        <td className="w-9 border-s border-border px-1 py-1.5 align-middle">
+        <td className="w-8 border-s border-border px-0.5 py-1 align-middle">
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggle}
             aria-label="הרחב"
-            className="h-7 w-7"
+            className="h-6 w-6"
           >
             <ChevronDown
               className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")}
@@ -66,7 +66,7 @@ export function TopicRow({
               value={topic.group}
               onValueChange={(v) => onChange({ group: v as Group })}
             >
-              <SelectTrigger className="h-8 w-full text-xs">
+              <SelectTrigger className="h-7 w-full text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -87,7 +87,7 @@ export function TopicRow({
               value={topic.topic}
               onChange={(e) => onChange({ topic: e.target.value })}
               placeholder="נושא"
-              className="h-8 text-sm"
+              className="h-7 text-sm"
             />
           ) : (
             <span className="text-sm font-medium text-foreground">
@@ -108,7 +108,7 @@ export function TopicRow({
               value={topic.priority}
               onValueChange={(v) => onChange({ priority: v as Priority })}
             >
-              <SelectTrigger className="h-8 w-28 text-xs">
+              <SelectTrigger className="h-7 w-full text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -145,7 +145,7 @@ export function TopicRow({
               value={topic.status}
               onValueChange={(v) => onChange({ status: v as ProjectStatus })}
             >
-              <SelectTrigger className="h-8 w-32 text-xs">
+              <SelectTrigger className="h-7 w-full text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -160,13 +160,13 @@ export function TopicRow({
             <StatusBadge status={topic.status} />
           )}
         </td>
-        <td className="w-9 border-s border-border px-1 py-1.5 align-middle">
+        <td className="w-8 border-s border-border px-0.5 py-1 align-middle">
           <Button
             variant="ghost"
             size="icon"
             onClick={onDelete}
             aria-label="מחק"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+            className="h-6 w-6 text-muted-foreground hover:text-destructive"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
