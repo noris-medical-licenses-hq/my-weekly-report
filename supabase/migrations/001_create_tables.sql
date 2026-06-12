@@ -42,3 +42,17 @@ drop trigger if exists reports_set_updated_at on public.reports;
 create trigger reports_set_updated_at
   before update on public.reports
   for each row execute procedure public.set_updated_at();
+
+-- Allow the anon (publishable) key full access — Phase 1: no auth
+grant all on table public.reports to anon;
+grant all on table public.topics  to anon;
+
+-- RLS policies (open for Phase 1 — no auth, no user-scoping)
+alter table public.reports enable row level security;
+alter table public.topics  enable row level security;
+
+create policy "anon_all" on public.reports
+  for all to anon using (true) with check (true);
+
+create policy "anon_all" on public.topics
+  for all to anon using (true) with check (true);
