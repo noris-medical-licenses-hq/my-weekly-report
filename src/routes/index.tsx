@@ -4,10 +4,10 @@ import { Download, Plus, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
-import { ProjectsTable } from "@/components/reporting/ProjectsTable";
-import { exportProjectsToExcel } from "@/lib/export-excel";
-import { projectsStore } from "@/lib/projects-store";
-import { emptyProject, type Project } from "@/lib/types";
+import { TopicsTable } from "@/components/reporting/TopicsTable";
+import { exportTopicsToExcel } from "@/lib/export-excel";
+import { topicsStore } from "@/lib/projects-store";
+import { emptyTopic, type Topic } from "@/lib/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,17 +22,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [dirty, setDirty] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setProjects(projectsStore.list());
+    setTopics(topicsStore.list());
     setLoaded(true);
   }, []);
 
-  const updateProject = (id: string, patch: Partial<Project>) => {
-    setProjects((prev) =>
+  const updateTopic = (id: string, patch: Partial<Topic>) => {
+    setTopics((prev) =>
       prev.map((p) =>
         p.id === id ? { ...p, ...patch, updatedAt: new Date().toISOString() } : p,
       ),
@@ -40,29 +40,30 @@ function Index() {
     setDirty(true);
   };
 
-  const deleteProject = (id: string) => {
-    if (!window.confirm("למחוק את הפרויקט?")) return;
-    setProjects((prev) => prev.filter((p) => p.id !== id));
+  const deleteTopic = (id: string) => {
+    if (!window.confirm("למחוק את הנושא?")) return;
+    setTopics((prev) => prev.filter((p) => p.id !== id));
     setDirty(true);
   };
 
-  const addProject = () => {
-    setProjects((prev) => [emptyProject(), ...prev]);
+  const addTopic = () => {
+    setTopics((prev) => [emptyTopic(), ...prev]);
     setDirty(true);
   };
 
   const save = () => {
-    projectsStore.saveAll(projects);
+    topicsStore.saveAll(topics);
     setDirty(false);
     toast.success("הדיווח נשמר");
   };
 
   const exportXlsx = () => {
-    exportProjectsToExcel(projects);
+    exportTopicsToExcel(topics);
     toast.success("הקובץ יוצא");
   };
 
-  const reviewedCount = projects.filter((p) => p.reviewedThisWeek).length;
+  const reviewedCount = topics.filter((t) => t.reviewed).length;
+  const changedCount = topics.filter((t) => t.changedSincePrevious).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,14 +76,14 @@ function Index() {
             </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
               {loaded
-                ? `${projects.length} פרויקטים · ${reviewedCount} נסקרו השבוע`
+                ? `${topics.length} נושאים · ${reviewedCount} נסקרו · ${changedCount} עם שינוי`
                 : "טוען…"}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" onClick={addProject}>
+            <Button variant="outline" size="sm" onClick={addTopic}>
               <Plus className="ms-1 h-4 w-4" />
-              פרויקט חדש
+              נושא חדש
             </Button>
             <Button variant="outline" size="sm" onClick={exportXlsx}>
               <Download className="ms-1 h-4 w-4" />
@@ -95,11 +96,11 @@ function Index() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-6">
-        <ProjectsTable
-          projects={projects}
-          onChange={updateProject}
-          onDelete={deleteProject}
+      <main className="mx-auto max-w-7xl px-6 py-6">
+        <TopicsTable
+          topics={topics}
+          onChange={updateTopic}
+          onDelete={deleteTopic}
         />
       </main>
     </div>
