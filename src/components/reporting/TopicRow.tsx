@@ -250,6 +250,7 @@ export function TopicRow({
                 label="עדכון קודם"
                 value={topic.previousWeekUpdate}
                 readOnly
+                rows={3}
                 placeholder="אין עדכון משבוע קודם"
               />
               <FieldBlock
@@ -257,33 +258,36 @@ export function TopicRow({
                 label="עדכון שבוע נוכחי"
                 value={topic.currentWeekUpdate}
                 onChange={(v) => handleChange({ currentWeekUpdate: v })}
-                rows={4}
+                rows={3}
               />
               <FieldBlock
                 id={`${topic.id}-risk`}
                 label="סיכונים ואתגרים"
                 value={topic.risksAndChallenges}
                 onChange={(v) => handleChange({ risksAndChallenges: v })}
-              />
-              <FieldBlock
-                id={`${topic.id}-manager`}
-                label="הערת מנהל"
-                value={topic.managerComment}
-                onChange={(v) => handleChange({ managerComment: v })}
                 rows={3}
-                placeholder="הזן הערת מנהל..."
-              />
-              <FieldBlock
-                id={`${topic.id}-next`}
-                label="עדיפות לשבוע הבא"
-                value={topic.nextWeekPriority}
-                onChange={(v) => handleChange({ nextWeekPriority: v })}
               />
               <FieldBlock
                 id={`${topic.id}-support`}
                 label="תמיכה נדרשת"
                 value={topic.supportRequired}
                 onChange={(v) => handleChange({ supportRequired: v })}
+                rows={3}
+              />
+              <FieldBlock
+                id={`${topic.id}-next`}
+                label="עדיפות לשבוע הבא"
+                value={topic.nextWeekPriority}
+                onChange={(v) => handleChange({ nextWeekPriority: v })}
+                rows={3}
+              />
+              <FieldBlock
+                id={`${topic.id}-manager`}
+                label='הערת מנכ"ל'
+                value={topic.managerComment}
+                onChange={(v) => handleChange({ managerComment: v })}
+                rows={3}
+                placeholder='הזן הערת מנכ"ל...'
               />
             </div>
             <div className="flex items-center justify-end gap-3 border-t border-border pt-3 mt-1">

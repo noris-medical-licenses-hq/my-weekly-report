@@ -12,7 +12,7 @@ export function exportTopicsToExcel(topics: Topic[]): void {
     סטטוס: STATUS_LABELS[t.status] ?? t.status,
     "עדכון שבוע קודם": t.previousWeekUpdate,
     "עדכון שבוע נוכחי": t.currentWeekUpdate,
-    "הערת מנהל": t.managerComment,
+    'הערת מנכ"ל': t.managerComment,
     "סיכונים ואתגרים": t.risksAndChallenges,
     "עדיפות לשבוע הבא": t.nextWeekPriority,
     "תמיכה נדרשת": t.supportRequired,
