@@ -92,7 +92,7 @@ export function HistoryViewer({ topics }: HistoryViewerProps) {
                   <tr className="border-b border-border bg-muted/20">
                     <td colSpan={8} className="px-6 py-5">
                       <div className="grid gap-4 md:grid-cols-2">
-                        <ReadField label="עדכון שבוע קודם" value={t.previousWeekUpdate} />
+                        <ReadField label="עדכון קודם" value={t.previousWeekUpdate} />
                         <ReadField label="עדכון שבוע נוכחי" value={t.currentWeekUpdate} />
                         {t.managerComment && (
                           <div className="md:col-span-2">

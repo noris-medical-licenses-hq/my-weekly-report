@@ -16,7 +16,8 @@ import { HistoryViewer } from "@/components/reporting/HistoryViewer";
 import { FilterBar, EMPTY_FILTERS, type Filters } from "@/components/reporting/FilterBar";
 import { exportTopicsToExcel } from "@/lib/export-excel";
 import { topicsStore } from "@/lib/projects-store";
-import { emptyTopic, type Topic } from "@/lib/types";
+import { emptyTopic, GROUPS, STATUS_LABELS, type Topic } from "@/lib/types";
+import { getCustomGroups, getCustomStatuses, saveCustomGroups, saveCustomStatuses } from "@/lib/custom-options";
 import {
   createFreshReport,
   createSupabaseRepositories,
@@ -67,6 +68,8 @@ function Index() {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [historyTopics, setHistoryTopics] = useState<Topic[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [customGroups, setCustomGroups] = useState<string[]>(() => getCustomGroups());
+  const [customStatuses, setCustomStatuses] = useState<string[]>(() => getCustomStatuses());
 
   useEffect(() => {
     async function load() {
@@ -96,6 +99,22 @@ function Index() {
     }
     load();
   }, []);
+
+  const allGroups = [...GROUPS, ...customGroups];
+
+  const handleAddGroup = (name: string) => {
+    if (allGroups.includes(name)) return;
+    const next = [...customGroups, name];
+    saveCustomGroups(next);
+    setCustomGroups(next);
+  };
+
+  const handleAddStatus = (name: string) => {
+    if (customStatuses.includes(name) || Object.keys(STATUS_LABELS).includes(name)) return;
+    const next = [...customStatuses, name];
+    saveCustomStatuses(next);
+    setCustomStatuses(next);
+  };
 
   const updateTopic = (id: string, patch: Partial<Topic>) => {
     setTopics((prev) =>
@@ -260,7 +279,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background">
       <Toaster position="top-center" dir="rtl" />
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-30 border-b border-border bg-card">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-foreground">
@@ -361,13 +380,22 @@ function Index() {
           <HistoryViewer topics={historyTopics} />
         ) : (
           <>
-            <FilterBar value={filters} onChange={setFilters} />
+            <FilterBar
+                value={filters}
+                onChange={setFilters}
+                groups={allGroups}
+                customStatuses={customStatuses}
+              />
             <TopicsTable
               topics={filtered}
               onChange={updateTopic}
               onDelete={deleteTopic}
               onSave={save}
               onReorder={reorderTopics}
+              groups={allGroups}
+              customStatuses={customStatuses}
+              onAddGroup={handleAddGroup}
+              onAddStatus={handleAddStatus}
             />
           </>
         )}

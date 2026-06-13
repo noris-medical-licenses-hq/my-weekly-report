@@ -1,6 +1,6 @@
-export type ProjectStatus = "on_track" | "at_risk" | "blocked" | "done";
+export type ProjectStatus = string;
 
-export const STATUS_LABELS: Record<ProjectStatus, string> = {
+export const STATUS_LABELS: Record<string, string> = {
   on_track: "במסלול",
   at_risk: "בסיכון",
   blocked: "חסום",
@@ -15,19 +15,19 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
   low: "נמוכה",
 };
 
-export const GROUPS = [
+export const GROUPS: readonly string[] = [
   "מחשוב / תשתיות / פרויקטים",
   "משאבי אנוש",
   "סטאטוס מחסנים גלובלי",
   "שרשרת אספקה / ספקים / ייצור",
-] as const;
-export type Group = (typeof GROUPS)[number];
+];
+export type Group = string;
 
 export interface Topic {
   id: string;
-  group: Group;
+  group: string;
   topic: string;
-  status: ProjectStatus;
+  status: string;
   priority: Priority;
   changedSincePrevious: boolean;
   reviewed: boolean;

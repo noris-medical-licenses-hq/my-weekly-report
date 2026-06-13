@@ -9,7 +9,7 @@ export function exportTopicsToExcel(topics: Topic[]): void {
     עדיפות: PRIORITY_LABELS[t.priority],
     'דורש תמיכה': t.supportRequired?.trim() ? "כן" : "לא",
     נסקר: t.reviewed ? "כן" : "לא",
-    סטטוס: STATUS_LABELS[t.status],
+    סטטוס: STATUS_LABELS[t.status] ?? t.status,
     "עדכון שבוע קודם": t.previousWeekUpdate,
     "עדכון שבוע נוכחי": t.currentWeekUpdate,
     "הערת מנהל": t.managerComment,

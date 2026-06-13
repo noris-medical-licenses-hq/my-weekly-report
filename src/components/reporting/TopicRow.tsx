@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronDown, GripVertical, Save, Trash2 } from "lucide-react";
+import { ChevronDown, GripVertical, Plus, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -13,12 +13,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  GROUPS,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   PRIORITY_LABELS,
   STATUS_LABELS,
-  type Group,
   type Priority,
-  type ProjectStatus,
   type Topic,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -33,6 +37,10 @@ interface TopicRowProps {
   onChange: (patch: Partial<Topic>) => void;
   onDelete: () => void;
   onSave: () => void;
+  groups: string[];
+  customStatuses: string[];
+  onAddGroup: (name: string) => void;
+  onAddStatus: (name: string) => void;
 }
 
 export function TopicRow({
@@ -42,8 +50,16 @@ export function TopicRow({
   onChange,
   onDelete,
   onSave,
+  groups,
+  customStatuses,
+  onAddGroup,
+  onAddStatus,
 }: TopicRowProps) {
   const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const [addGroupOpen, setAddGroupOpen] = useState(false);
+  const [addGroupInput, setAddGroupInput] = useState("");
+  const [addStatusOpen, setAddStatusOpen] = useState(false);
+  const [addStatusInput, setAddStatusInput] = useState("");
 
   const {
     attributes,
@@ -112,21 +128,19 @@ export function TopicRow({
         </td>
         <td className={cell}>
           {expanded ? (
-            <Select
-              value={topic.group}
-              onValueChange={(v) => handleChange({ group: v as Group })}
-            >
-              <SelectTrigger className="h-7 w-full text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {GROUPS.map((g) => (
-                  <SelectItem key={g} value={g} className="text-xs">
-                    {g}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-1">
+              <Select value={topic.group} onValueChange={(v) => handleChange({ group: v })}>
+                <SelectTrigger className="h-7 flex-1 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {groups.map((g) => (
+                    <SelectItem key={g} value={g} className="text-xs">{g}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => setAddGroupOpen(true)}>
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           ) : (
             <span className="text-xs text-muted-foreground">{topic.group}</span>
           )}
@@ -191,21 +205,26 @@ export function TopicRow({
         </td>
         <td className={cell}>
           {expanded ? (
-            <Select
-              value={topic.status}
-              onValueChange={(v) => handleChange({ status: v as ProjectStatus })}
-            >
-              <SelectTrigger className="h-7 w-full text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.keys(STATUS_LABELS) as ProjectStatus[]).map((s) => (
-                  <SelectItem key={s} value={s} className="text-xs">
-                    {STATUS_LABELS[s]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-1">
+              <Select value={topic.status} onValueChange={(v) => handleChange({ status: v })}>
+                <SelectTrigger className="h-7 flex-1 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(STATUS_LABELS).map((s) => (
+                    <SelectItem key={s} value={s} className="text-xs">
+                      {STATUS_LABELS[s]}
+                    </SelectItem>
+                  ))}
+                  {customStatuses.map((s) => (
+                    <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => setAddStatusOpen(true)}>
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           ) : (
             <StatusBadge status={topic.status} />
           )}
@@ -228,7 +247,7 @@ export function TopicRow({
             <div className="grid gap-4 md:grid-cols-2">
               <FieldBlock
                 id={`${topic.id}-prev`}
-                label="עדכון שבוע קודם"
+                label="עדכון קודם"
                 value={topic.previousWeekUpdate}
                 readOnly
                 placeholder="אין עדכון משבוע קודם"
@@ -240,21 +259,19 @@ export function TopicRow({
                 onChange={(v) => handleChange({ currentWeekUpdate: v })}
                 rows={4}
               />
-              <div className="md:col-span-2">
-                <FieldBlock
-                  id={`${topic.id}-manager`}
-                  label="הערת מנהל"
-                  value={topic.managerComment}
-                  onChange={(v) => handleChange({ managerComment: v })}
-                  rows={3}
-                  placeholder="הזן הערת מנהל..."
-                />
-              </div>
               <FieldBlock
                 id={`${topic.id}-risk`}
                 label="סיכונים ואתגרים"
                 value={topic.risksAndChallenges}
                 onChange={(v) => handleChange({ risksAndChallenges: v })}
+              />
+              <FieldBlock
+                id={`${topic.id}-manager`}
+                label="הערת מנהל"
+                value={topic.managerComment}
+                onChange={(v) => handleChange({ managerComment: v })}
+                rows={3}
+                placeholder="הזן הערת מנהל..."
               />
               <FieldBlock
                 id={`${topic.id}-next`}
@@ -287,6 +304,74 @@ export function TopicRow({
           </td>
         </tr>
       )}
+
+      <Dialog open={addGroupOpen} onOpenChange={setAddGroupOpen}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>הוסף קבוצה חדשה</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={addGroupInput}
+            onChange={(e) => setAddGroupInput(e.target.value)}
+            placeholder="שם הקבוצה"
+            dir="rtl"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && addGroupInput.trim()) {
+                onAddGroup(addGroupInput.trim());
+                setAddGroupInput("");
+                setAddGroupOpen(false);
+              }
+            }}
+          />
+          <DialogFooter>
+            <Button
+              size="sm"
+              disabled={!addGroupInput.trim()}
+              onClick={() => {
+                onAddGroup(addGroupInput.trim());
+                setAddGroupInput("");
+                setAddGroupOpen(false);
+              }}
+            >
+              הוסף
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addStatusOpen} onOpenChange={setAddStatusOpen}>
+        <DialogContent dir="rtl" className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>הוסף סטטוס חדש</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={addStatusInput}
+            onChange={(e) => setAddStatusInput(e.target.value)}
+            placeholder="שם הסטטוס"
+            dir="rtl"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && addStatusInput.trim()) {
+                onAddStatus(addStatusInput.trim());
+                setAddStatusInput("");
+                setAddStatusOpen(false);
+              }
+            }}
+          />
+          <DialogFooter>
+            <Button
+              size="sm"
+              disabled={!addStatusInput.trim()}
+              onClick={() => {
+                onAddStatus(addStatusInput.trim());
+                setAddStatusInput("");
+                setAddStatusOpen(false);
+              }}
+            >
+              הוסף
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

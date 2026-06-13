@@ -17,7 +17,7 @@ function read(): Topic[] {
       return SEED_TOPICS;
     }
     // Spread default before topic data so existing entries with the field override it.
-    return (JSON.parse(raw) as Topic[]).map((t) => ({ managerComment: "", ...t }));
+    return (JSON.parse(raw) as Topic[]).map((t) => ({ ...t, managerComment: t.managerComment ?? "" }));
   } catch {
     return SEED_TOPICS;
   }

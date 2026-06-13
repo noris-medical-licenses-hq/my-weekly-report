@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   Select,
   SelectContent,
@@ -8,18 +9,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import {
-  GROUPS,
   PRIORITY_LABELS,
   STATUS_LABELS,
-  type Group,
   type Priority,
-  type ProjectStatus,
 } from "@/lib/types";
 
 export interface Filters {
-  group: Group | "all";
+  group: string;
   priority: Priority | "all";
-  status: ProjectStatus | "all";
+  status: string;
   supportRequired: "all" | "yes" | "no";
   reviewed: "all" | "yes" | "no";
   changed: "all" | "yes" | "no";
@@ -37,6 +35,8 @@ export const EMPTY_FILTERS: Filters = {
 interface Props {
   value: Filters;
   onChange: (next: Filters) => void;
+  groups: string[];
+  customStatuses: string[];
 }
 
 const YN = [
@@ -45,7 +45,7 @@ const YN = [
   { v: "no", l: "לא" },
 ] as const;
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex w-40 flex-col gap-1">
       <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
@@ -54,7 +54,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export function FilterBar({ value, onChange }: Props) {
+export function FilterBar({ value, onChange, groups, customStatuses }: Props) {
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) =>
     onChange({ ...value, [k]: v });
   const isDirty = JSON.stringify(value) !== JSON.stringify(EMPTY_FILTERS);
@@ -63,11 +63,11 @@ export function FilterBar({ value, onChange }: Props) {
     <div className="mb-3 rounded-md border border-border bg-card p-3">
       <div className="flex flex-wrap items-end gap-2">
         <Field label="קבוצה">
-          <Select value={value.group} onValueChange={(v) => set("group", v as Group | "all")}>
+          <Select value={value.group} onValueChange={(v) => set("group", v)}>
             <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">הכל</SelectItem>
-              {GROUPS.map((g) => (
+              {groups.map((g) => (
                 <SelectItem key={g} value={g} className="text-xs">{g}</SelectItem>
               ))}
             </SelectContent>
@@ -85,12 +85,15 @@ export function FilterBar({ value, onChange }: Props) {
           </Select>
         </Field>
         <Field label="סטטוס">
-          <Select value={value.status} onValueChange={(v) => set("status", v as ProjectStatus | "all")}>
+          <Select value={value.status} onValueChange={(v) => set("status", v)}>
             <SelectTrigger className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">הכל</SelectItem>
-              {(Object.keys(STATUS_LABELS) as ProjectStatus[]).map((s) => (
+              {Object.keys(STATUS_LABELS).map((s) => (
                 <SelectItem key={s} value={s} className="text-xs">{STATUS_LABELS[s]}</SelectItem>
+              ))}
+              {customStatuses.map((s) => (
+                <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
               ))}
             </SelectContent>
           </Select>
