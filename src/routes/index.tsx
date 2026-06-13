@@ -70,6 +70,17 @@ function Index() {
 
   useEffect(() => {
     async function load() {
+      // beforeLoad is skipped server-side (typeof window === "undefined"), so SSR
+      // hydration never re-runs it. This client-side check is the reliable gate:
+      // useEffect runs only on the client, after hydration, on every page load.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        navigate({ to: "/login" });
+        return;
+      }
+
       try {
         await runMigrationIfNeeded();
         const { topics: repo, report } = await createSupabaseRepositories();
